@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>TO DO LIST</h1>
+    <form  action="/set-task" method="get" onsubmit="abc(event)">
+    <input type="text" placeholder="Add your task" name="task" id="task">
+
+    <input type="submit">
+</form>
+<ol id="list"></ol>
+</body>
+<script>
+    let list = document.getElementById("list");
+    function print(){
+        fetch("/get-task")
+        .then(res => res.json())
+        .then(data => {
+        let dataObj = JSON.parse(data ? data : "[]");
+        console.log(dataObj);
+        list.innerHTML = " "
+        dataObj.forEach(element => {
+            let li =`<li>${element.task}
+                <button onclick="del('${element.task}')">delete</button>
+                <button onclick="edit('${element.task}')">edit</button>
+                </li>`;
+            list.innerHTML += li;
+        });
+    })
+   
+    }
+    print()
+    function abc(event){
+        event.preventDefault();
+        let task = document.getElementById("task").value;
+        
+
+        fetch("/set-task?task="+task)
+        .then(res=>res.text())
+        .then(data=>{
+            console.log(data);
+            list.innerHTML += `<li>${task}
+                <button onclick="del('${task}')">delete</button>
+                <button onclick="edit('${task}')">edit</button>
+                </li>`
+        })
+    }
+    function del(task){
+        console.log(task)
+        fetch(`/del-task?task=${task}`)
+        .then(res => res.text())
+        .then(data =>{
+            console.log(data);
+            print();
+        })
+    }
+    function edit(oldtask){
+    
+    let newtask = prompt("Enter new task")
+        fetch(`/edit-task?oldtask=${oldtask}&newtask=${newtask}`)
+        .then(res => res.text())
+        .then(data =>{
+            console.log(data);
+            print();
+        })
+    }
+</script>
+</html>
